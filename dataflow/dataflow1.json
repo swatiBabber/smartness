@@ -12,9 +12,21 @@
 					"name": "source1"
 				}
 			],
-			"sinks": [],
-			"transformations": [],
-			"script": "source(output(\n\t\t{_col0_} as string,\n\t\t{_col1_} as string,\n\t\t{_col2_} as string,\n\t\t{_col3_} as date,\n\t\t{_col4_} as string,\n\t\t{_col5_} as string,\n\t\t{_col6_} as string,\n\t\t{_col7_} as string,\n\t\t{_col8_} as date\n\t),\n\tallowSchemaDrift: true,\n\tvalidateSchema: false,\n\tignoreNoFilesFound: false) ~> source1"
+			"sinks": [
+				{
+					"dataset": {
+						"referenceName": "AzureSqlTable1",
+						"type": "DatasetReference"
+					},
+					"name": "sink1"
+				}
+			],
+			"transformations": [
+				{
+					"name": "AddFirstNameLastName"
+				}
+			],
+			"script": "parameters{\n\tMaxCustomerKey as integer,\n\tBatchDt as string\n}\nsource(output(\n\t\t{_col0_} as string,\n\t\t{_col1_} as string,\n\t\t{_col2_} as string,\n\t\t{_col3_} as date,\n\t\t{_col4_} as string,\n\t\t{_col5_} as string,\n\t\t{_col6_} as string,\n\t\t{_col7_} as string,\n\t\t{_col8_} as date\n\t),\n\tallowSchemaDrift: true,\n\tvalidateSchema: false,\n\tignoreNoFilesFound: false) ~> source1\nsource1 derive(FirstName = split({_col1_},\" \")[1],\n\t\tLastName = split({_col1_},\" \")[2]) ~> AddFirstNameLastName\nsource1 sink(allowSchemaDrift: true,\n\tvalidateSchema: false,\n\tdeletable:false,\n\tinsertable:true,\n\tupdateable:false,\n\tupsertable:false,\n\tformat: 'table',\n\tskipDuplicateMapInputs: true,\n\tskipDuplicateMapOutputs: true,\n\terrorHandlingOption: 'stopOnFirstError') ~> sink1"
 		}
 	}
 }

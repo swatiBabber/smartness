@@ -1,0 +1,77 @@
+{
+	"name": "WWIOrderlinesSftpToBlob",
+	"properties": {
+		"activities": [
+			{
+				"name": "CopyWWIOrdersSftpToBlob",
+				"type": "Copy",
+				"dependsOn": [],
+				"policy": {
+					"timeout": "7.00:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"source": {
+						"type": "ParquetSource",
+						"storeSettings": {
+							"type": "SftpReadSettings",
+							"recursive": true
+						}
+					},
+					"sink": {
+						"type": "ParquetSink",
+						"storeSettings": {
+							"type": "AzureBlobStorageWriteSettings"
+						},
+						"formatSettings": {
+							"type": "ParquetWriteSettings"
+						}
+					},
+					"enableStaging": false,
+					"translator": {
+						"type": "TabularTranslator",
+						"typeConversion": true,
+						"typeConversionSettings": {
+							"allowDataTruncation": true,
+							"treatBooleanAsNumber": false
+						}
+					}
+				},
+				"inputs": [
+					{
+						"referenceName": "WWISftpParquet",
+						"type": "DatasetReference",
+						"parameters": {
+							"folder": "WorldWideImporters/orderlines",
+							"filename": "orderlines_@{pipeline().parameters.date}\n\n",
+							"filetype": "parquet"
+						}
+					}
+				],
+				"outputs": [
+					{
+						"referenceName": "WWIStagingBlobParquet",
+						"type": "DatasetReference",
+						"parameters": {
+							"folder": "orderlines",
+							"filename": "orderlines_@{pipeline().parameters.date}",
+							"filetype": "parquet"
+						}
+					}
+				]
+			}
+		],
+		"parameters": {
+			"date": {
+				"type": "string"
+			}
+		},
+		"annotations": [],
+		"lastPublishTime": "2020-11-23T09:38:15Z"
+	},
+	"type": "Microsoft.DataFactory/factories/pipelines"
+}

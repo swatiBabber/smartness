@@ -1,0 +1,193 @@
+{
+	"name": "SmartFoodTransactionApiToBlob",
+	"properties": {
+		"activities": [
+			{
+				"name": "AKVUsername",
+				"type": "WebActivity",
+				"dependsOn": [],
+				"policy": {
+					"timeout": "7.00:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": true,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"url": "https://adf-swati-dev-kv.vault.azure.net/secrets/SmartFoodsRestAPIUsername/7a9578c5ae644687a9b721239307f494?api-version=7.0",
+					"connectVia": {
+						"referenceName": "DiwaliHOLIR",
+						"type": "IntegrationRuntimeReference"
+					},
+					"method": "GET",
+					"body": {
+						"value": "@json(concat('{\"username\":\"','adflab','\",\"password\":\"','Password.1!','\"'))",
+						"type": "Expression"
+					},
+					"authentication": {
+						"type": "MSI",
+						"resource": "https://vault.azure.net"
+					}
+				}
+			},
+			{
+				"name": "AKVPassword",
+				"type": "WebActivity",
+				"dependsOn": [],
+				"policy": {
+					"timeout": "7.00:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": true,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"url": "https://adf-swati-dev-kv.vault.azure.net/secrets/SmartFoodsRestAPIPassword/0ff21e4e3e284393bbafac94b0d3e81d?api-version=7.0",
+					"method": "GET",
+					"authentication": {
+						"type": "MSI",
+						"resource": "https://vault.azure.net"
+					}
+				}
+			},
+			{
+				"name": "SmartFoodsLogin",
+				"type": "WebActivity",
+				"dependsOn": [
+					{
+						"activity": "AKVUsername",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					},
+					{
+						"activity": "AKVPassword",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"policy": {
+					"timeout": "7.00:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": true,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"url": "https://smartfoods.azurewebsites.net/api/SmartFoodsOauth",
+					"method": "POST",
+					"body": {
+						"value": "@json(concat('{\"username\":\"',activity('AKVUsername').output.value,'\",\"password\":\"',activity('AKVPassword').output.value,'\"'))",
+						"type": "Expression"
+					}
+				}
+			},
+			{
+				"name": "SetAccessToken",
+				"type": "SetVariable",
+				"dependsOn": [
+					{
+						"activity": "SmartFoodsLogin",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"userProperties": [],
+				"typeProperties": {
+					"variableName": "token",
+					"value": {
+						"value": "@activity('SmartFoodsLogin').output.token",
+						"type": "Expression"
+					}
+				}
+			},
+			{
+				"name": "SmartFoodsTransactionsToBlob",
+				"type": "Copy",
+				"dependsOn": [
+					{
+						"activity": "SetAccessToken",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"policy": {
+					"timeout": "7.00:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"source": {
+						"type": "DelimitedTextSource",
+						"storeSettings": {
+							"type": "HttpReadSettings",
+							"requestMethod": "POST",
+							"requestBody": {
+								"value": "@{json(concat('{\"trans_date\": \"',pipeline().parameters.date,'\",\"dataDomain\" : \"transactions\"}'))}",
+								"type": "Expression"
+							},
+							"requestTimeout": ""
+						},
+						"formatSettings": {
+							"type": "DelimitedTextReadSettings"
+						}
+					},
+					"sink": {
+						"type": "DelimitedTextSink",
+						"storeSettings": {
+							"type": "AzureBlobStorageWriteSettings"
+						},
+						"formatSettings": {
+							"type": "DelimitedTextWriteSettings",
+							"quoteAllText": true,
+							"fileExtension": ".txt"
+						}
+					},
+					"enableStaging": false
+				},
+				"inputs": [
+					{
+						"referenceName": "SmartFoodsTransactionApiCsv",
+						"type": "DatasetReference",
+						"parameters": {
+							"authCode": "@variables('token')"
+						}
+					}
+				],
+				"outputs": [
+					{
+						"referenceName": "SmartFoodsDelimitedTextBlob",
+						"type": "DatasetReference",
+						"parameters": {
+							"folder": "trans",
+							"filename": "smartfoods_transactions_@{replace(pipeline().parameters.date,'-','')}",
+							"filetype": "csv"
+						}
+					}
+				]
+			}
+		],
+		"parameters": {
+			"date": {
+				"type": "string"
+			}
+		},
+		"variables": {
+			"token": {
+				"type": "String"
+			}
+		},
+		"annotations": [],
+		"lastPublishTime": "2020-11-20T21:38:24Z"
+	},
+	"type": "Microsoft.DataFactory/factories/pipelines"
+}

@@ -1,0 +1,17 @@
+{
+	"name": "SmartFoodsApiLinkedService",
+	"type": "Microsoft.DataFactory/factories/linkedservices",
+	"properties": {
+		"annotations": [],
+		"type": "HttpServer",
+		"typeProperties": {
+			"url": "https://smartfoods.azurewebsites.net/api/",
+			"enableServerCertificateValidation": true,
+			"authenticationType": "Anonymous"
+		},
+		"connectVia": {
+			"referenceName": "DiwaliHOLIR",
+			"type": "IntegrationRuntimeReference"
+		}
+	}
+}

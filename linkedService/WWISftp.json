@@ -1,0 +1,27 @@
+{
+	"name": "WWISftp",
+	"type": "Microsoft.DataFactory/factories/linkedservices",
+	"properties": {
+		"annotations": [],
+		"type": "Sftp",
+		"typeProperties": {
+			"host": "adflabsftp.westus2.cloudapp.azure.com",
+			"port": 22,
+			"skipHostKeyValidation": true,
+			"authenticationType": "Basic",
+			"userName": "sftpuser",
+			"password": {
+				"type": "AzureKeyVaultSecret",
+				"store": {
+					"referenceName": "AKV_LinkedService",
+					"type": "LinkedServiceReference"
+				},
+				"secretName": "WWISftpPassword"
+			}
+		},
+		"connectVia": {
+			"referenceName": "DiwaliHOLIR",
+			"type": "IntegrationRuntimeReference"
+		}
+	}
+}

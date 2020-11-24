@@ -1,0 +1,24 @@
+{
+	"name": "pipeline1",
+	"properties": {
+		"activities": [
+			{
+				"name": "WebHook1",
+				"type": "WebHook",
+				"dependsOn": [],
+				"userProperties": [],
+				"typeProperties": {
+					"url": "https://a9de91ff-1be7-4f78-82bb-3cb4ce44693a.webhook.eus.azure-automation.net/webhooks?token=Sb0euoA3v1r5EcnWc5akbOOmqSHdJWdrgpfwMRKQxAg%3d",
+					"method": "POST",
+					"body": {
+						"ContainerName": "OfficeData"
+					},
+					"timeout": "00:10:00"
+				}
+			}
+		],
+		"annotations": [],
+		"lastPublishTime": "2020-11-23T22:43:56Z"
+	},
+	"type": "Microsoft.DataFactory/factories/pipelines"
+}

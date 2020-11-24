@@ -1,0 +1,22 @@
+{
+	"name": "BlobLinkedService",
+	"type": "Microsoft.DataFactory/factories/linkedservices",
+	"properties": {
+		"annotations": [],
+		"type": "AzureBlobStorage",
+		"typeProperties": {
+			"connectionString": {
+				"type": "AzureKeyVaultSecret",
+				"store": {
+					"referenceName": "AKV_LinkedService",
+					"type": "LinkedServiceReference"
+				},
+				"secretName": "adfdiwalistorageconnectionstring"
+			}
+		},
+		"connectVia": {
+			"referenceName": "DiwaliHOLIR",
+			"type": "IntegrationRuntimeReference"
+		}
+	}
+}
